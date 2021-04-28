@@ -14,6 +14,17 @@ import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
  * @author joma
  */
 public class AppServer extends DefaultSingleRecoverable {
+    
+    /*
+        Tarefas do servidor:
+    
+        1. Armazenar a lista de personagens
+        2. Adicionar ou remover personagens dessa lista
+        3. Atualizar dados dos personagens
+        4. retornar informações de um personagem
+        5. Calcular vencedor de um dado combate e atualizar infos dos envolvidos
+    
+    */
 
     public AppServer(int id) {
         

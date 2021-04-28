@@ -14,13 +14,13 @@ public class Personagem {
     private int wins = 0;
     private int matches_played = 0;
     private int strength;
-    private static int personagem_count = 0;
+    private static int id = 0;
     
     // Construtor padrão pro cliente
     public Personagem(String name, int strength){
         setName(name);
         setStrength(strength);
-        this.personagem_count++;
+        this.id++;
     }
     
     // Construtor pra popular o BD
@@ -29,7 +29,7 @@ public class Personagem {
         setStrength(strength);
         setWins(wins);
         setMatchesPlayed(matches_played);
-        this.personagem_count++;
+        this.id++;
     }
     
     public void setName(String name){
@@ -87,8 +87,8 @@ public class Personagem {
         }
     }
     
-    // Retorna a contagem de personagens criados
-    public int getPersonagemCount(){
-        return this.personagem_count;
+    // Retorna o id do personagem
+    public int getId(){
+        return this.id;
     }
 }

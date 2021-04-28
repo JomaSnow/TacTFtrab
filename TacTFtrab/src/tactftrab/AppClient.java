@@ -18,7 +18,16 @@ public class AppClient {
         
         //enviar requisição EM BYTES 
         
-        //teste
+        /*oq o cliente pode fazer nesse app:
+        
+            1. criar personagem (nome, força);
+            2. solicitar lista de personagens (retorna array de perso);
+            3. pedir pra ver informações de um personagem (wins, jogos, win ratio);
+            4. realizar combate (escolhe dois personagens, o servidor retorna quem ganhou e atualiza os dados dos envolvidos);
+            5. deletar personagem (passa id);
+            6. editar personagem (passa id e escolhe o campo pra alterar);
+        
+        */
         
     }
 }
