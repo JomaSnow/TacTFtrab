@@ -18,5 +18,7 @@ public class AppClient {
         
         //enviar requisição EM BYTES 
         
+        //teste
+        
     }
 }
