@@ -80,10 +80,12 @@ public class Personagem {
     
     // Retorna o porcentual de vitória deste personagem
     public double getWinRatio(){
-        if(this.matches_played==0){
+        if(this.matches_played<1){
             return 0.0;
         }else{
-            return this.wins/this.matches_played;
+            double w = this.wins;
+            double mp = this.matches_played;
+            return (w/mp)*100;
         }
     }
     

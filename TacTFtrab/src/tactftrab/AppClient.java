@@ -6,18 +6,18 @@
 package tactftrab;
 
 import bftsmart.tom.ServiceProxy;
+import java.util.HashMap;
 
 /**
  *
  * @author joma
  */
 public class AppClient {
-    
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         ServiceProxy proxy = new ServiceProxy(1001);
-        
+
         //enviar requisição EM BYTES 
-        
         /*oq o cliente pode fazer nesse app:
         
             1. criar personagem (nome, força);
@@ -27,7 +27,6 @@ public class AppClient {
             5. deletar personagem (passa id);
             6. editar personagem (passa id e escolhe o campo pra alterar);
         
-        */
-        
+         */
     }
 }
