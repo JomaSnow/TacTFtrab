@@ -111,11 +111,17 @@ public class AppClient {
                     break;
                 }
                 case 4: {
+                    scan.nextLine(); // consome newLine de cima (just JAVA things)  
                     System.out.println("criar");
                     buffer1 = scan.nextLine();
                     strength = scan.nextInt();
                     byte[] content = concatenateArrays(intToByte(strength), buffer1.getBytes());
                     byte[] request = encodeByteArray(content, 4);
+
+                    for (byte b : request) {
+                        System.out.print(b);
+                    }
+
                     break;
                 }
                 case 5: {
@@ -129,10 +135,15 @@ public class AppClient {
                         switch (choice) {
                             case 1: {
                                 System.out.print("\nNovo Nome:  ");
+                                scan.nextLine(); // consome newLine de cima.
                                 buffer1 = scan.nextLine();
 
-                                byte[] content = buffer1.getBytes();
+                                byte[] content = concatenateArrays(intToByte(id1), buffer1.getBytes());
                                 byte[] request = encodeByteArray(content, 51);
+
+                                for (byte b : request) {
+                                    System.out.print(b);
+                                }
 
                                 break;
                             }
@@ -140,8 +151,12 @@ public class AppClient {
                                 System.out.print("\nNova força:  ");
                                 strength = scan.nextInt();
 
-                                byte[] content = intToByte(strength);
+                                byte[] content = concatenateArrays(intToByte(id1), intToByte(strength));
                                 byte[] request = encodeByteArray(content, 52);
+
+                                for (byte b : request) {
+                                    System.out.print(b);
+                                }
 
                                 break;
                             }
@@ -158,6 +173,11 @@ public class AppClient {
                     id1 = scan.nextInt();
                     byte[] content = intToByte(id1);
                     byte[] request = encodeByteArray(content, 6);
+
+                    for (byte b : request) {
+                        System.out.print(b);
+                    }
+
                     break;
                 }
                 case 0: {
