@@ -32,7 +32,27 @@ public class AppServer extends DefaultSingleRecoverable {
         new ServiceReplica(id, this, this);
         initDB(database);
     }
+    
+    @Override
+    public byte[] appExecuteOrdered(byte[] bytes, MessageContext mc) {
+        return null;
+    }
 
+    @Override
+    public byte[] appExecuteUnordered(byte[] bytes, MessageContext mc) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public byte[] getSnapshot() {
+        return null;
+    }
+
+    @Override
+    public void installSnapshot(byte[] bytes) {
+
+    }
+    
     public void initDB(HashMap<Integer, Personagem> map) {
 //        String line = null;
 
@@ -99,25 +119,35 @@ public class AppServer extends DefaultSingleRecoverable {
         return this.database;
     }
 
-    @Override
-    public byte[] appExecuteOrdered(byte[] bytes, MessageContext mc) {
-        return null;
-    }
-
-    @Override
-    public byte[] appExecuteUnordered(byte[] bytes, MessageContext mc) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public byte[] getSnapshot() {
-        return null;
-    }
-
-    @Override
-    public void installSnapshot(byte[] bytes) {
-
-    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static void main(String[] args) {
         // TODO code application logic here
     }
