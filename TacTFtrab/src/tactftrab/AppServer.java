@@ -90,12 +90,53 @@ public class AppServer extends DefaultSingleRecoverable {
                 break;
             }
             case 51: {
+                byte[] personagemIdByte = new byte[4];
+                byte[] nameByte = new byte[request.length - 4];
+
+                System.arraycopy(request, 0, personagemIdByte, 0, personagemIdByte.length);
+                System.arraycopy(request, personagemIdByte.length, nameByte, 0, nameByte.length);
+
+                int personagemId = ByteBuffer.wrap(personagemIdByte).getInt();
+                String name = new String(nameByte);
+
+                try {
+                    updateNamePersonagemInMap(personagemId, name);
+                    byte[] reply = ("\nNome atualizado").getBytes();
+                    return reply;
+                } catch (InputMismatchException e) {
+                    System.out.println("Algo deu errado. Não foi possível atualizar o Personagem.");
+                }
                 break;
             }
             case 52: {
+                byte[] personagemIdByte = new byte[4];
+                byte[] strengthByte = new byte[request.length - 4];
+
+                System.arraycopy(request, 0, personagemIdByte, 0, personagemIdByte.length);
+                System.arraycopy(request, personagemIdByte.length, strengthByte, 0, strengthByte.length);
+
+                int personagemId = ByteBuffer.wrap(personagemIdByte).getInt();
+                int strength = ByteBuffer.wrap(strengthByte).getInt();
+
+                try {
+                    updateStrengthPersonagemInMap(personagemId, strength);
+                    byte[] reply = ("\nForça atualizado").getBytes();
+                    return reply;
+                } catch (InputMismatchException e) {
+                    System.out.println("Algo deu errado. Não foi possível atualizar o Personagem.");
+                }
                 break;
             }
             case 6: {
+                int personagemId = ByteBuffer.wrap(request).getInt();
+                try {
+                    Personagem p = getPersonagemById(personagemId);
+                    removePersonagemFromMap(personagemId);
+                    byte[] reply = ("\nPersonagem " + p.getName() + ", força " + p.getStrength() + " foi removido com sucesso.").getBytes();
+                    return reply;
+                } catch (NullPointerException ex) {
+                    System.out.println("O id informado não corresponde a um Personagem cadastrado.");
+                }
                 break;
             }
             default: {
@@ -170,12 +211,6 @@ public class AppServer extends DefaultSingleRecoverable {
 
     public void removePersonagemFromMap(int id) {
         this.database.remove(id);
-    }
-
-    public void updateAllPersonagemInMap(int id, String newName, int newStrength) {
-        Personagem p = getPersonagemById(id);
-        p.setName(newName);
-        p.setStrength(newStrength);
     }
 
     public void updateNamePersonagemInMap(int id, String newName) {

@@ -80,8 +80,9 @@ public class AppClient {
         ServiceProxy proxy = new ServiceProxy(1001);
 
         // Inicia interface usuário
+        System.out.print("\n\n\n\t\t*******************\n\t\t* UFC dos Famosos *\n\t\t*******************\n\nEsta aplicação coloca dois personagens da sua escolha (e criação?) para lutarem e medirem força!\nCompleto com estatísticas!\n");
         while (loop) {
-            System.out.print("\n\n\n\t\t*******************\n\t\t* UFC dos Famosos *\n\t\t*******************\n\nEsta aplicação coloca dois personagens da sua escolha (e criação?) para lutarem e medirem força!\nCompleto com estatísticas!\n\nEscolha uma das opções abaixo:\n\n");
+            System.out.println("\nEscolha uma das opções abaixo:\n");
             System.out.println("\t1. Começar nova luta!");
             System.out.println("\t2. Exibir Lista de Personagens");
             System.out.println("\t3. Exibir dados sobre um Personagem");
@@ -89,6 +90,7 @@ public class AppClient {
             System.out.println("\t5. Editar um Personagem");
             System.out.println("\t6. Remover um Personagem\n");
             System.out.println("\t0. Encerrar programa");
+
             choice = scan.nextInt();
 
             switch (choice) {
@@ -115,16 +117,15 @@ public class AppClient {
                     break;
                 }
                 case 3: {
-                    System.out.print("Informe o id do Personagem para exibir os dados: ");
-                    id1 = scan.nextInt();
-                    byte[] content = intToByte(id1);
-                    byte[] request = encodeByteArray(content, 3);
-                    byte[] reply = proxy.invokeOrdered(request);
-
                     try {
+                        System.out.print("Informe o id do Personagem para exibir os dados: ");
+                        id1 = scan.nextInt();
+                        byte[] content = intToByte(id1);
+                        byte[] request = encodeByteArray(content, 3);
+                        byte[] reply = proxy.invokeOrdered(request);
                         p = personagemFromByte(reply);
                         System.out.println("\nNome: " + p.getName() + "\tForça: " + p.getStrength() + "\tBatalhas Disputadas: " + p.getMatchesPlayed() + "\tVitórias: " + p.getWins() + "\tTaxa de Vitória: " + p.getWinRatio() + "%");
-                    } catch (NullPointerException | IOException | ClassNotFoundException e) {
+                    } catch (InputMismatchException | NullPointerException | IOException | ClassNotFoundException e) {
                         // E se não tiver o id?
                         System.out.println("\nPersonagem não encontrado.");
                     }
@@ -150,39 +151,58 @@ public class AppClient {
                     break;
                 }
                 case 5: {
-                    System.out.println("editar");
-                    id1 = scan.nextInt();
+                    byte[] content;
+                    byte[] request;
+                    byte[] reply;
                     boolean editLoop = true;
+
+                    System.out.print("Informe o Id do Personagem que deseja editar: ");
+                    id1 = scan.nextInt();
                     while (editLoop) {
-                        //retornar dados do personagem
-                        System.out.println("\t1. Editar nome\n\t2. Editar força\n\n\t0. Sair");
-                        choice = scan.nextInt();
+                        try {
+                            content = intToByte(id1);
+                            request = encodeByteArray(content, 3);
+                            reply = proxy.invokeOrdered(request);
+                            p = personagemFromByte(reply);
+                            System.out.println("\n\tId: " + p.getId() + "\tNome: " + p.getName() + "\tForça: " + p.getStrength());
+                            System.out.println("\n\t1. Editar nome\n\t2. Editar força\n\n\t0. Sair");
+                            choice = scan.nextInt();
+                        } catch (InputMismatchException | NullPointerException | IOException | ClassNotFoundException e) {
+                            // E se não tiver o id?
+                            System.out.println("\nPersonagem não encontrado.");
+                            choice = 0;
+                        }
                         switch (choice) {
                             case 1: {
-                                System.out.print("\nNovo Nome:  ");
-                                scan.nextLine(); // consome newLine de cima.
-                                buffer1 = scan.nextLine();
+                                try {
+                                    System.out.print("\nNovo Nome:  ");
+                                    scan.nextLine(); // consome newLine de cima.
+                                    buffer1 = scan.nextLine();
 
-                                byte[] content = concatenateArrays(intToByte(id1), buffer1.getBytes());
-                                byte[] request = encodeByteArray(content, 51);
-
-                                for (byte b : request) {
-                                    System.out.print(b);
+                                    content = concatenateArrays(intToByte(id1), buffer1.getBytes());
+                                    request = encodeByteArray(content, 51);
+                                    reply = proxy.invokeOrdered(request);
+                                    String replyString = new String(reply);
+                                    System.out.println(replyString);
+                                } catch (Exception e) {
+                                    System.out.println("\nOcorreu um erro.");
                                 }
-
                                 break;
                             }
                             case 2: {
-                                System.out.print("\nNova força:  ");
-                                strength = scan.nextInt();
+                                try {
+                                    System.out.print("\nNova força:  ");
+                                    strength = scan.nextInt();
 
-                                byte[] content = concatenateArrays(intToByte(id1), intToByte(strength));
-                                byte[] request = encodeByteArray(content, 52);
-
-                                for (byte b : request) {
-                                    System.out.print(b);
+                                    content = concatenateArrays(intToByte(id1), intToByte(strength));
+                                    request = encodeByteArray(content, 52);
+                                    reply = proxy.invokeOrdered(request);
+                                    String replyString = new String(reply);
+                                    System.out.println(replyString);
+                                } catch (InputMismatchException e) {
+                                    System.out.println("\nEntrada inválida.");
+                                    choice = 3;
                                 }
-
                                 break;
                             }
                             default: {
@@ -194,13 +214,17 @@ public class AppClient {
                     break;
                 }
                 case 6: {
-                    System.out.println("remover");
-                    id1 = scan.nextInt();
-                    byte[] content = intToByte(id1);
-                    byte[] request = encodeByteArray(content, 6);
-
-                    for (byte b : request) {
-                        System.out.print(b);
+                    try {
+                        System.out.print("Informe o id do Personagem para remover: ");
+                        id1 = scan.nextInt();
+                        byte[] content = intToByte(id1);
+                        byte[] request = encodeByteArray(content, 6);
+                        byte[] reply = proxy.invokeOrdered(request);
+                        String replyString = new String(reply);
+                        System.out.println(replyString);
+                    } catch (InputMismatchException | NullPointerException e) {
+                        // E se não tiver o id?
+                        System.out.println("\nPersonagem não encontrado.\nNenhum Personagem removido.");
                     }
 
                     break;
@@ -212,6 +236,7 @@ public class AppClient {
                     break;
                 }
                 default: {
+                    System.out.println("\nSeleciona uma opção da lista.");
                     break;
                 }
             }
