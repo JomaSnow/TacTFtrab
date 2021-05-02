@@ -11,7 +11,9 @@ import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 
 /**
  *
@@ -33,15 +35,21 @@ public class AppServer extends DefaultSingleRecoverable {
      */
     public AppServer(int id) {
 
-        new ServiceReplica(id, this, this);
         initDB(database);
+        new ServiceReplica(id, this, this);
     }
 
     @Override
     public byte[] appExecuteOrdered(byte[] bytes, MessageContext mc) {
 
-        int requestId = 0;
-        byte[] request = decodeRequest(bytes, requestId);
+        int requestId;
+        byte[] requestIdBytes = new byte[4];
+        byte[] request = new byte[bytes.length - 4];
+
+        System.arraycopy(bytes, 0, requestIdBytes, 0, requestIdBytes.length);
+        System.arraycopy(bytes, requestIdBytes.length, request, 0, request.length);
+
+        requestId = ByteBuffer.wrap(requestIdBytes).getInt();
 
         switch (requestId) {
             case 1: {
@@ -51,17 +59,34 @@ public class AppServer extends DefaultSingleRecoverable {
                 break;
             }
             case 3: {
-                int personagemId = request[0];
-                Personagem p = getPersonagemById(personagemId);
+                int personagemId = ByteBuffer.wrap(request).getInt();
                 try {
+                    Personagem p = getPersonagemById(personagemId);
                     byte[] reply = personagemToByte(p);
                     return reply;
-                }catch(IOException ex){
-                    System.out.println("Ocorreu um erro. "+ex.getMessage());
+                } catch (NullPointerException | IOException ex) {
+                    System.out.println("O id informado não corresponde a um Personagem cadastrado.");
                 }
                 break;
             }
             case 4: {
+                byte[] strengthByte = new byte[4];
+                byte[] nameByte = new byte[request.length - 4];
+
+                System.arraycopy(request, 0, strengthByte, 0, strengthByte.length);
+                System.arraycopy(request, strengthByte.length, nameByte, 0, nameByte.length);
+
+                int strength = ByteBuffer.wrap(strengthByte).getInt();
+                String name = new String(nameByte);
+
+                try {
+                    Personagem p = new Personagem(name, strength);
+                    addPersonagemToMap(p);
+                    byte[] reply = ("\nNovo Personagem adicionado com sucesso.\n\n\tId: " + p.getId() + "\tNome: " + p.getName() + "\tForça: " + p.getStrength()).getBytes();
+                    return reply;
+                } catch (InputMismatchException e) {
+                    System.out.println("Algo deu errado. Não foi possível adicionar o Personagem.");
+                }
                 break;
             }
             case 51: {
@@ -94,17 +119,6 @@ public class AppServer extends DefaultSingleRecoverable {
     @Override
     public void installSnapshot(byte[] bytes) {
 
-    }
-
-    public byte[] decodeRequest(byte[] bytes, int requestId) {
-        byte[] requestIdBytes = new byte[4];
-        byte[] request = new byte[bytes.length - 4];
-
-        System.arraycopy(bytes, 0, requestIdBytes, 0, requestIdBytes.length);
-        System.arraycopy(bytes, requestIdBytes.length, request, 0, request.length);
-
-        requestId = requestIdBytes[0];
-        return request;
     }
 
     public static byte[] personagemToByte(Personagem p) throws IOException {

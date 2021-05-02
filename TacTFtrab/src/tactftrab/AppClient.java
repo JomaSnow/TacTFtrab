@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
@@ -123,23 +124,27 @@ public class AppClient {
                     try {
                         p = personagemFromByte(reply);
                         System.out.println("\nNome: " + p.getName() + "\tForça: " + p.getStrength() + "\tBatalhas Disputadas: " + p.getMatchesPlayed() + "\tVitórias: " + p.getWins() + "\tTaxa de Vitória: " + p.getWinRatio() + "%");
-                    } catch (IOException | ClassNotFoundException e) {
+                    } catch (NullPointerException | IOException | ClassNotFoundException e) {
                         // E se não tiver o id?
-                        System.out.println("Personagem não encontrado.");
+                        System.out.println("\nPersonagem não encontrado.");
                     }
 
                     break;
                 }
                 case 4: {
-                    scan.nextLine(); // consome newLine de cima (just JAVA things)  
-                    System.out.println("criar");
-                    buffer1 = scan.nextLine();
-                    strength = scan.nextInt();
-                    byte[] content = concatenateArrays(intToByte(strength), buffer1.getBytes());
-                    byte[] request = encodeByteArray(content, 4);
-
-                    for (byte b : request) {
-                        System.out.print(b);
+                    try {
+                        scan.nextLine(); // consome newLine de cima (just JAVA things)  
+                        System.out.print("Informe o nome do novo Personagem: ");
+                        buffer1 = scan.nextLine();
+                        System.out.print("Informe a força do novo Personagem: ");
+                        strength = scan.nextInt();
+                        byte[] content = concatenateArrays(intToByte(strength), buffer1.getBytes());
+                        byte[] request = encodeByteArray(content, 4);
+                        byte[] reply = proxy.invokeOrdered(request);
+                        String replyString = new String(reply);
+                        System.out.println(replyString);
+                    } catch (InputMismatchException e) {
+                        System.out.println("\nNão foi possível adicionar o Personagem.");
                     }
 
                     break;
@@ -203,6 +208,7 @@ public class AppClient {
                 case 0: {
                     loop = false;
                     System.out.println("Encerrando o programa");
+                    proxy.close();
                     break;
                 }
                 default: {
@@ -210,5 +216,6 @@ public class AppClient {
                 }
             }
         }
+        System.exit(0);
     }
 }
