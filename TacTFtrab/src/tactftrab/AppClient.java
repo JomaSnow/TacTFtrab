@@ -6,7 +6,12 @@
 package tactftrab;
 
 import bftsmart.tom.ServiceProxy;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -44,26 +49,35 @@ public class AppClient {
         return concatenateArrays(byteRequest, originalArray);
     }
 
+    public static Personagem personagemFromByte(byte[] pByte) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(pByte);
+        ObjectInput in = null;
+        Personagem p;
+
+        try {
+            in = new ObjectInputStream(bis);
+            p = (Personagem) in.readObject();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+            }
+        }
+
+        return p;
+    }
+
     public static void main(String[] args) throws IOException {
         Scanner scan = new Scanner(System.in);
-        String buffer1, buffer2;
+        String buffer1;
         int choice, strength, id1, id2;
         HashMap<Integer, Personagem> currentPersonagens;
         Personagem p;
         boolean loop = true;
-//        ServiceProxy proxy = new ServiceProxy(1001);
+        ServiceProxy proxy = new ServiceProxy(1001);
 
-        //enviar requisição EM BYTES 
-        /*oq o cliente pode fazer nesse app:
-        
-            1. criar personagem (nome, força);
-            2. solicitar lista de personagens (retorna array de perso);
-            3. pedir pra ver informações de um personagem (wins, jogos, win ratio);
-            4. realizar combate (escolhe dois personagens, o servidor retorna quem ganhou e atualiza os dados dos envolvidos);
-            5. deletar personagem (passa id);
-            6. editar personagem (passa id e escolhe o campo pra alterar);
-        
-         */
         // Inicia interface usuário
         while (loop) {
             System.out.print("\n\n\n\t\t*******************\n\t\t* UFC dos Famosos *\n\t\t*******************\n\nEsta aplicação coloca dois personagens da sua escolha (e criação?) para lutarem e medirem força!\nCompleto com estatísticas!\n\nEscolha uma das opções abaixo:\n\n");
@@ -95,17 +109,23 @@ public class AppClient {
                 case 2: {
                     System.out.println("lista");
                     byte[] request = intToByte(2);
+                    byte[] reply = proxy.invokeOrdered(request);
 
                     break;
                 }
                 case 3: {
-                    System.out.println("dados");
+                    System.out.print("Informe o id do Personagem para exibir os dados: ");
                     id1 = scan.nextInt();
                     byte[] content = intToByte(id1);
                     byte[] request = encodeByteArray(content, 3);
+                    byte[] reply = proxy.invokeOrdered(request);
 
-                    for (byte b : request) {
-                        System.out.print(b);
+                    try {
+                        p = personagemFromByte(reply);
+                        System.out.println("\nNome: " + p.getName() + "\tForça: " + p.getStrength() + "\tBatalhas Disputadas: " + p.getMatchesPlayed() + "\tVitórias: " + p.getWins() + "\tTaxa de Vitória: " + p.getWinRatio() + "%");
+                    } catch (IOException | ClassNotFoundException e) {
+                        // E se não tiver o id?
+                        System.out.println("Personagem não encontrado.");
                     }
 
                     break;

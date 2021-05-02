@@ -8,6 +8,9 @@ package tactftrab;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
 /**
@@ -15,8 +18,9 @@ import java.util.HashMap;
  * @author joma
  */
 public class AppServer extends DefaultSingleRecoverable {
+
     HashMap<Integer, Personagem> database = new HashMap<Integer, Personagem>();
-    
+
     /*
         Tarefas do servidor:
     
@@ -32,9 +36,48 @@ public class AppServer extends DefaultSingleRecoverable {
         new ServiceReplica(id, this, this);
         initDB(database);
     }
-    
+
     @Override
     public byte[] appExecuteOrdered(byte[] bytes, MessageContext mc) {
+
+        int requestId = 0;
+        byte[] request = decodeRequest(bytes, requestId);
+
+        switch (requestId) {
+            case 1: {
+                break;
+            }
+            case 2: {
+                break;
+            }
+            case 3: {
+                int personagemId = request[0];
+                Personagem p = getPersonagemById(personagemId);
+                try {
+                    byte[] reply = personagemToByte(p);
+                    return reply;
+                }catch(IOException ex){
+                    System.out.println("Ocorreu um erro. "+ex.getMessage());
+                }
+                break;
+            }
+            case 4: {
+                break;
+            }
+            case 51: {
+                break;
+            }
+            case 52: {
+                break;
+            }
+            case 6: {
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
         return null;
     }
 
@@ -45,14 +88,44 @@ public class AppServer extends DefaultSingleRecoverable {
 
     @Override
     public byte[] getSnapshot() {
-        return null;
+        return new byte[0];
     }
 
     @Override
     public void installSnapshot(byte[] bytes) {
 
     }
-    
+
+    public byte[] decodeRequest(byte[] bytes, int requestId) {
+        byte[] requestIdBytes = new byte[4];
+        byte[] request = new byte[bytes.length - 4];
+
+        System.arraycopy(bytes, 0, requestIdBytes, 0, requestIdBytes.length);
+        System.arraycopy(bytes, requestIdBytes.length, request, 0, request.length);
+
+        requestId = requestIdBytes[0];
+        return request;
+    }
+
+    public static byte[] personagemToByte(Personagem p) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = null;
+        byte[] pByte;
+        try {
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(p);
+            oos.flush();
+            pByte = bos.toByteArray();
+        } finally {
+            try {
+                bos.close();
+
+            } catch (IOException ex) {
+            }
+        }
+        return pByte;
+    }
+
     public void initDB(HashMap<Integer, Personagem> map) {
 //        String line = null;
 
@@ -90,12 +163,12 @@ public class AppServer extends DefaultSingleRecoverable {
         p.setName(newName);
         p.setStrength(newStrength);
     }
-    
+
     public void updateNamePersonagemInMap(int id, String newName) {
         Personagem p = getPersonagemById(id);
         p.setName(newName);
     }
-    
+
     public void updateStrengthPersonagemInMap(int id, int newStrength) {
         Personagem p = getPersonagemById(id);
         p.setStrength(newStrength);
@@ -119,36 +192,9 @@ public class AppServer extends DefaultSingleRecoverable {
         return this.database;
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     public static void main(String[] args) {
         // TODO code application logic here
+
+        new AppServer(Integer.parseInt(args[0]));
     }
 }

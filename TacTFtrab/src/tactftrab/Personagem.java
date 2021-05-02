@@ -5,11 +5,13 @@
  */
 package tactftrab;
 
+import java.io.Serializable;
+
 /**
  *
  * @author joma
  */
-public class Personagem {
+public class Personagem implements Serializable{
     private String name;
     private int wins = 0;
     private int matches_played = 0;
