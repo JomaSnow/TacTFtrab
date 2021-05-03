@@ -40,10 +40,6 @@ public class AppClient {
         return ByteBuffer.allocate(4).putInt(num).array();
     }
 
-    public static byte[] doubleToByte(double num) {
-        return ByteBuffer.allocate(8).putDouble(num).array();
-    }
-
     public static byte[] encodeByteArray(byte[] originalArray, int requestId) {
         // inteiro ocupa 4 bytes. Conversão:
         byte[] byteRequest = ByteBuffer.allocate(4).putInt(requestId).array();
@@ -70,12 +66,12 @@ public class AppClient {
         return p;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scan = new Scanner(System.in);
         String buffer1;
         int choice, strength, id1, id2;
         HashMap<Integer, Personagem> currentPersonagens;
-        Personagem p;
+        Personagem p, q;
         boolean loop = true;
         ServiceProxy proxy = new ServiceProxy(1001);
 
@@ -95,16 +91,38 @@ public class AppClient {
 
             switch (choice) {
                 case 1: {
-                    System.out.println("\n\n\n\n\n\n\n\n##################");
-                    System.out.print("id1: ");
-                    id1 = scan.nextInt();
-                    System.out.print("\nid2: ");
-                    id2 = scan.nextInt();
-                    byte[] content = concatenateArrays(intToByte(id1), intToByte(id2));
-                    byte[] request = encodeByteArray(content, 1);
-
-                    for (byte b : request) {
-                        System.out.print(b);
+                        byte[] content;
+                        byte[] request;
+                        byte[] reply;
+                    try{
+                        System.out.println("\n\n\n\n\n\n\n\n\t\t##################\n\t\tUm novo duelo se inicia!");
+                        System.out.print("Informe o id do primeiro Personagem: ");
+                        id1 = scan.nextInt();
+                        content = intToByte(id1);
+                        request = encodeByteArray(content, 3);
+                        reply = proxy.invokeOrdered(request);
+                        p = personagemFromByte(reply);
+                        
+                        System.out.print("Informe o id do segundo Personagem: ");
+                        id2 = scan.nextInt();
+                        content = intToByte(id2);
+                        request = encodeByteArray(content, 3);
+                        reply = proxy.invokeOrdered(request);
+                        q = personagemFromByte(reply);
+                        
+                        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        dueloPrint(p, q);
+                        
+                        content = concatenateArrays(intToByte(id1), intToByte(id2));
+                        request = encodeByteArray(content, 1);
+                        reply = proxy.invokeOrdered(request);
+                        p = personagemFromByte(reply);
+                        System.out.println("\t"+p.getName()+" Ganhou este duelo!");
+                        System.out.println("\tNovos Resultados:");
+                        System.out.println("\nNome: " + p.getName() + "\tForça: " + p.getStrength() + "\tBatalhas Disputadas: " + p.getMatchesPlayed() + "\tVitórias: " + p.getWins() + "\tTaxa de Vitória: " + p.getWinRatio() + "%");
+                    } catch (InputMismatchException | NullPointerException | IOException | ClassNotFoundException e) {
+                        // E se não tiver o id?
+                        System.out.println("\nPersonagem não encontrado.");
                     }
 
                     break;
@@ -242,5 +260,389 @@ public class AppClient {
             }
         }
         System.exit(0);
+    }
+    
+    public static void dueloPrint(Personagem p, Personagem q) throws InterruptedException{
+        System.out.println("\tUm novo duelo está prestes a iniciar!!");
+        System.out.println("\tDe um lado: "+p.getName()+", duelista apresentando "+p.getWinRatio()+"% de taxa de vitória e "+p.getMatchesPlayed()+" partidas disputadas!");
+        System.out.println("\n\tE do outro lado, o desafiante de hoje: "+q.getName()+"! Taxa de vitória: "+q.getWinRatio()+"% ("+q.getMatchesPlayed()+" partidas)");
+        Thread.sleep(1000);
+        System.out.println("\n\n\tO duelo começa!\n");
+        Thread.sleep(500);
+        if(q.getWinRatio()>p.getWinRatio()){
+            System.out.println("\t"+q.getName()+", convencido da vitória, avança com tremenda velocidade em direção ao oponente!");
+            Thread.sleep(300);
+            if(p.getMatchesPlayed()>q.getMatchesPlayed()){
+                System.out.println("\tJá um duelista experiente, "+p.getName()+" antecipa o movimento do oponente e evita o ataque!");
+                Thread.sleep(300);
+                if(p.getStrength()>q.getStrength()){
+                    //p ganha
+                    if(p.getStrength()-q.getStrength()>80){
+                            System.out.println("\t"+q.getName()+" se mostra vulnerável por um breve período, e "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o golpe! O desafiante tenta se manter de pé, com muito esforço.");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+p.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" é nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(p.getStrength()-q.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" se mostra vulnerável por um breve período, e "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o duelista se recupera rapidamente, e antes que "+q.getName()+" perceba, "+p.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" se mostra vulnerável por um breve período, e "+p.getName()+" aproveita essa abertura e tenta um golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista contra ataca! Com impressionante força, "+p.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+p.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante vai ao chão! Sem forças para continuar, "+q.getName()+" perde este duelo!");
+                            Thread.sleep(300);
+                            
+                        }
+                    }
+                }else{
+                    //q ganha
+                    if(q.getStrength()-p.getStrength()>80){
+                            System.out.println("\tImpressionante!! Com incrível agilidade e força "+q.getName()+" consegue realizar um segundo golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" não consegue defender o golpe! O duelista sente bastante o golpe, e tenta com esforço se manter de pé!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+q.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" vai ao chão, nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(q.getStrength()-p.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" se recupera do golpe errado e rapidamente tenta outro ataque! Desta vez "+p.getName()+" não consegue desviar!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o desafiante se recupera rapidamente, e antes que "+p.getName()+" perceba, "+q.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" se recupera do golpe errado e rapidamente tenta outro ataque!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante contra ataca! Com impressionante força, "+q.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+q.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista vai ao chão!");
+                            Thread.sleep(300);
+                            System.out.println("\tCom muito esforço, "+p.getName()+" se levanta!! Mas já muito fraco, não consegue se manter de pé, e cai novamente, selando sua derrota!");
+                            Thread.sleep(300);
+                        }
+                    }
+                }
+            }else{
+                System.out.println("\tO avanço rápido parece pegar "+p.getName()+" de surpresa, forçando uma defesa espetacular de última hora!");
+                Thread.sleep(300);
+                if(p.getStrength()>q.getStrength()){
+                    //p ganha
+                    if(p.getStrength()-q.getStrength()>80){
+                            System.out.println("\t"+q.getName()+" parece não acreditar que seu ataque foi bloqueado, perdendo a concentração por um instante! "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o golpe! O desafiante tenta se manter de pé, com muito esforço.");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+p.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" é nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(p.getStrength()-q.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" parece não acreditar que seu ataque foi bloqueado, perdendo a concentração por um instante! "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o duelista se recupera rapidamente, e antes que "+q.getName()+" perceba, "+p.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" parece não acreditar que seu ataque foi bloqueado, perdendo a concentração por um instante! "+p.getName()+" aproveita essa abertura e tenta um golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista contra ataca! Com impressionante força, "+p.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+p.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante vai ao chão! Sem forças para continuar, "+q.getName()+" perde este duelo!");
+                            Thread.sleep(300);
+                            
+                        }
+                    }
+                }else{
+                    //q ganha
+                    if(q.getStrength()-p.getStrength()>80){
+                            System.out.println("\tImpressionante!! Com incrível força "+q.getName()+" consegue realizar um segundo golpe, quebrando a defesa de "+p.getName()+"!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista sente bastante o golpe, e tenta com esforço se manter de pé!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+q.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" vai ao chão, nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(q.getStrength()-p.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" rapidamente tenta outro ataque! Desta vez "+p.getName()+" não consegue defender!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o desafiante se recupera rapidamente, e antes que "+p.getName()+" perceba, "+q.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" rapidamente tenta outro ataque!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante contra ataca! Com impressionante força, "+q.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+q.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista vai ao chão!");
+                            Thread.sleep(300);
+                            System.out.println("\tCom muito esforço, "+p.getName()+" se levanta!! Mas já muito fraco, não consegue se manter de pé, e cai novamente, selando sua derrota!");
+                            Thread.sleep(300);
+                        }
+                    }
+                }
+            }
+        }else{
+            System.out.println("\tOs duelistas se encaram e ameaçam golpes!");
+            Thread.sleep(300);
+            System.out.println("\t"+q.getName()+" toma a iniciativa e avança com tremenda velocidade em direção ao oponente!");
+            Thread.sleep(300);
+            if(p.getMatchesPlayed()>q.getMatchesPlayed()){
+                System.out.println("\tJá um duelista experiente, "+p.getName()+" antecipa o movimento do oponente e evita o ataque!");
+                Thread.sleep(300);
+                if(p.getStrength()>q.getStrength()){
+                    //p ganha
+                    if(p.getStrength()-q.getStrength()>80){
+                            System.out.println("\t"+q.getName()+" se mostra vulnerável por um breve período, e "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o golpe! O desafiante tenta se manter de pé, com muito esforço.");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+p.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" é nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(p.getStrength()-q.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" se mostra vulnerável por um breve período, e "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o duelista se recupera rapidamente, e antes que "+q.getName()+" perceba, "+p.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" se mostra vulnerável por um breve período, e "+p.getName()+" aproveita essa abertura e tenta um golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista contra ataca! Com impressionante força, "+p.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+p.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante vai ao chão! Sem forças para continuar, "+q.getName()+" perde este duelo!");
+                            Thread.sleep(300);
+                            
+                        }
+                    }
+                }else{
+                    //q ganha
+                    if(q.getStrength()-p.getStrength()>80){
+                            System.out.println("\tImpressionante!! Com incrível agilidade e força "+q.getName()+" consegue realizar um segundo golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" não consegue defender o golpe! O duelista sente bastante o golpe, e tenta com esforço se manter de pé!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+q.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" vai ao chão, nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(q.getStrength()-p.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" se recupera do golpe errado e rapidamente tenta outro ataque! Desta vez "+p.getName()+" não consegue desviar!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o desafiante se recupera rapidamente, e antes que "+p.getName()+" perceba, "+q.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" se recupera do golpe errado e rapidamente tenta outro ataque!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante contra ataca! Com impressionante força, "+q.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+q.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista vai ao chão!");
+                            Thread.sleep(300);
+                            System.out.println("\tCom muito esforço, "+p.getName()+" se levanta!! Mas já muito fraco, não consegue se manter de pé, e cai novamente, selando sua derrota!");
+                            Thread.sleep(300);
+                        }
+                    }
+                }
+            }else{
+                System.out.println("\tO avanço rápido parece pegar "+p.getName()+" de surpresa, forçando uma defesa espetacular de última hora!");
+                Thread.sleep(300);
+                if(p.getStrength()>q.getStrength()){
+                    //p ganha
+                    if(p.getStrength()-q.getStrength()>80){
+                            System.out.println("\t"+q.getName()+" parece não acreditar que seu ataque foi bloqueado, perdendo a concentração por um instante! "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o golpe! O desafiante tenta se manter de pé, com muito esforço.");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+p.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" é nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(p.getStrength()-q.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" parece não acreditar que seu ataque foi bloqueado, perdendo a concentração por um instante! "+p.getName()+" aproveita essa abertura e encaixa um golpe preciso!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o duelista se recupera rapidamente, e antes que "+q.getName()+" perceba, "+p.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" parece não acreditar que seu ataque foi bloqueado, perdendo a concentração por um instante! "+p.getName()+" aproveita essa abertura e tenta um golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista contra ataca! Com impressionante força, "+p.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+p.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante vai ao chão! Sem forças para continuar, "+q.getName()+" perde este duelo!");
+                            Thread.sleep(300);
+                            
+                        }
+                    }
+                }else{
+                    //q ganha
+                    if(q.getStrength()-p.getStrength()>80){
+                            System.out.println("\tImpressionante!! Com incrível força "+q.getName()+" consegue realizar um segundo golpe, quebrando a defesa de "+p.getName()+"!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista sente bastante o golpe, e tenta com esforço se manter de pé!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem dar chances de seu oponente se recuperar, "+q.getName()+" finaliza a luta com outro acerto definitivo!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" vai ao chão, nocauteado!");
+                            Thread.sleep(300);
+                    }else{
+                        if(q.getStrength()-p.getStrength()>50){
+                            System.out.println("\t"+q.getName()+" rapidamente tenta outro ataque! Desta vez "+p.getName()+" não consegue defender!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" sente bastante o acerto, mas se prepara para devolver o golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\tNo entanto o desafiante se recupera rapidamente, e antes que "+p.getName()+" perceba, "+q.getName()+" acerta um golpe extraordinário!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" tenta, mas não consegue se levantar!");
+                            Thread.sleep(300);
+                        }else{
+                            System.out.println("\t"+q.getName()+" rapidamente tenta outro ataque!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" defende o golpe com esforço e não perde tempo em devolver com um golpe próprio!");
+                            Thread.sleep(300);
+                            System.out.println("\tO golpe encaixa!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+q.getName()+" parece sentir o golpe recebido, mas se recupera rapidamente!");
+                            Thread.sleep(300);
+                            System.out.println("\tO desafiante contra ataca! Com impressionante força, "+q.getName()+" tenta mais um golpe em seu oponente!");
+                            Thread.sleep(300);
+                            System.out.println("\t"+p.getName()+" consegue se defender novamente, mas dessa vez o ataque o deixa mais exposto!");
+                            Thread.sleep(300);
+                            System.out.println("\tSem perder tempo, "+q.getName()+" junta o resto de suas forças e acerta um último golpe!");
+                            Thread.sleep(300);
+                            System.out.println("\tO duelista vai ao chão!");
+                            Thread.sleep(300);
+                            System.out.println("\tCom muito esforço, "+p.getName()+" se levanta!! Mas já muito fraco, não consegue se manter de pé, e cai novamente, selando sua derrota!");
+                            Thread.sleep(300);
+                        }
+                    }
+                }
+            }
+        }    
     }
 }

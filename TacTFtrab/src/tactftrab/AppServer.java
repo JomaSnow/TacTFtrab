@@ -53,6 +53,24 @@ public class AppServer extends DefaultSingleRecoverable {
 
         switch (requestId) {
             case 1: {
+                byte[] id1Byte = new byte[4];
+                byte[] id2Byte = new byte[request.length - 4];
+
+                System.arraycopy(request, 0, id1Byte, 0, id1Byte.length);
+                System.arraycopy(request, id1Byte.length, id2Byte, 0, id2Byte.length);
+
+                int id1 = ByteBuffer.wrap(id1Byte).getInt();
+                int id2 = ByteBuffer.wrap(id2Byte).getInt();
+
+                try {
+                    Personagem p1, p2;
+                    p1 = getPersonagemById(id1);
+                    p2 = getPersonagemById(id2);
+                    byte[] reply = personagemToByte(combat(p1, p2));
+                    return reply;
+                } catch (IOException | InputMismatchException e) {
+                    System.out.println("Algo deu errado. Não foi possível atualizar o Personagem.");
+                }
                 break;
             }
             case 2: {
@@ -227,13 +245,15 @@ public class AppServer extends DefaultSingleRecoverable {
         return this.database.get(id);
     }
 
-    public void combat(Personagem p1, Personagem p2) {
+    public Personagem combat(Personagem p1, Personagem p2) {
         p1.play();
         p2.play();
         if (p1.getStrength() > p2.getStrength()) {
             p1.win();
+            return p1;
         } else {
             p2.win();
+            return p2;
         }
     }
 
