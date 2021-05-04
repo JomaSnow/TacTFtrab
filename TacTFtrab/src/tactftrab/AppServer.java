@@ -8,12 +8,17 @@ package tactftrab;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,17 +27,6 @@ import java.util.InputMismatchException;
 public class AppServer extends DefaultSingleRecoverable {
 
     HashMap<Integer, Personagem> database = new HashMap<Integer, Personagem>();
-
-    /*
-        Tarefas do servidor:
-    
-        1. Armazenar a lista de personagens
-        2. Adicionar ou remover personagens dessa lista
-        3. Atualizar dados dos personagens
-        4. retornar informações de um personagem
-        5. Calcular vencedor de um dado combate e atualizar infos dos envolvidos
-    
-     */
     public AppServer(int id) {
 
         initDB(database);
@@ -177,12 +171,23 @@ public class AppServer extends DefaultSingleRecoverable {
 
     @Override
     public byte[] getSnapshot() {
+        try {
+            return databaseToByte(database);
+        } catch (IOException ex) {
+            Logger.getLogger(AppServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return new byte[0];
     }
 
     @Override
     public void installSnapshot(byte[] bytes) {
-
+        try {
+            this.database = databaseFromByte(bytes);
+        } catch (IOException ex) {
+            Logger.getLogger(AppServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(AppServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static byte[] personagemToByte(Personagem p) throws IOException {
@@ -221,6 +226,26 @@ public class AppServer extends DefaultSingleRecoverable {
             }
         }
         return dbByte;
+    }
+    
+    public static HashMap<Integer, Personagem> databaseFromByte(byte[] pByte) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(pByte);
+        ObjectInput in = null;
+        HashMap<Integer, Personagem> db;
+
+        try {
+            in = new ObjectInputStream(bis);
+            db = (HashMap<Integer, Personagem>) in.readObject();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+            }
+        }
+
+        return db;
     }
 
     public void initDB(HashMap<Integer, Personagem> map) {

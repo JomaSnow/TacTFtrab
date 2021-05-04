@@ -7,11 +7,9 @@ package tactftrab;
 
 import bftsmart.tom.ServiceProxy;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
