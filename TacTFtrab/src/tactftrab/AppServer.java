@@ -74,6 +74,11 @@ public class AppServer extends DefaultSingleRecoverable {
                 break;
             }
             case 2: {
+                try{
+                    byte[] reply = databaseToByte(getPersonagemLista());
+                    return reply;
+                }catch(IOException ex){
+                }
                 break;
             }
             case 3: {
@@ -197,6 +202,25 @@ public class AppServer extends DefaultSingleRecoverable {
             }
         }
         return pByte;
+    }
+    
+    public static byte[] databaseToByte(HashMap<Integer, Personagem> db) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = null;
+        byte[] dbByte;
+        try {
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(db);
+            oos.flush();
+            dbByte = bos.toByteArray();
+        } finally {
+            try {
+                bos.close();
+
+            } catch (IOException ex) {
+            }
+        }
+        return dbByte;
     }
 
     public void initDB(HashMap<Integer, Personagem> map) {

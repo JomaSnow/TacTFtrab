@@ -16,6 +16,7 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -65,6 +66,26 @@ public class AppClient {
 
         return p;
     }
+    
+    public static HashMap<Integer, Personagem> databaseFromByte(byte[] pByte) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(pByte);
+        ObjectInput in = null;
+        HashMap<Integer, Personagem> db;
+
+        try {
+            in = new ObjectInputStream(bis);
+            db = (HashMap<Integer, Personagem>) in.readObject();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+            }
+        }
+
+        return db;
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scan = new Scanner(System.in);
@@ -76,7 +97,7 @@ public class AppClient {
         ServiceProxy proxy = new ServiceProxy(1001);
 
         // Inicia interface usuário
-        System.out.print("\n\n\n\t\t*******************\n\t\t* UFC dos Famosos *\n\t\t*******************\n\nEsta aplicação coloca dois personagens da sua escolha (e criação?) para lutarem e medirem força!\nCompleto com estatísticas!\n");
+        System.out.print("\n\n\n\t\t*****************************\n\t\t* TFF Text Fiction Fighting *\n\t\t*****************************\n\nEsta aplicação coloca dois personagens da sua escolha (e criação?) para lutarem e medirem força!\nCompleto com estatísticas!\n");
         while (loop) {
             System.out.println("\nEscolha uma das opções abaixo:\n");
             System.out.println("\t1. Começar nova luta!");
@@ -128,9 +149,19 @@ public class AppClient {
                     break;
                 }
                 case 2: {
-                    System.out.println("lista");
-                    byte[] request = intToByte(2);
-                    byte[] reply = proxy.invokeOrdered(request);
+                    try{
+                        System.out.println("\n\t\tPersonagens cadastrados\n");
+                        byte[] request = intToByte(2);
+                        byte[] reply = proxy.invokeOrdered(request);
+                        currentPersonagens = databaseFromByte(reply);
+                        
+                        for(Map.Entry<Integer, Personagem> entry : currentPersonagens.entrySet()){
+                            p = entry.getValue();
+                            System.out.println("\tId: "+entry.getKey()+"\tNome: "+p.getName()+"\tForça: "+p.getStrength());
+                        }
+                    }catch(NullPointerException | ClassNotFoundException e){
+                        System.out.println("\nNão foi possível resgatar a lista de personagens.");
+                    }
 
                     break;
                 }
