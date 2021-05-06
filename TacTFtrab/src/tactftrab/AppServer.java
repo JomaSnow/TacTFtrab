@@ -270,6 +270,33 @@ public class AppServer extends DefaultSingleRecoverable {
         map.put(p2.getId(), p2);
         Personagem p3 = new Personagem("Nalon", 90, 9, 10);
         map.put(p3.getId(), p3);
+
+        Personagem p4 = new Personagem("Baguncinha", 1, 0, 100);
+        map.put(p4.getId(), p4);
+        
+        Personagem p5 = new Personagem("Kratos", 100, 77, 100);
+        map.put(p5.getId(), p5);
+        
+        Personagem p6 = new Personagem("Denji", 65, 40, 100);
+        map.put(p6.getId(), p6);
+        
+        Personagem p7 = new Personagem("Makima", 80, 66, 100);
+        map.put(p7.getId(), p7);
+        
+        Personagem p8 = new Personagem("Chun-li", 44, 31, 100);
+        map.put(p8.getId(), p8);
+        
+        Personagem p9 = new Personagem("Ryu", 50, 38, 100);
+        map.put(p9.getId(), p9);
+        
+        Personagem p10 = new Personagem("Sukuna", 99, 70, 100);
+        map.put(p10.getId(), p10);
+        
+        Personagem p11 = new Personagem("Guts", 80, 59, 100);
+        map.put(p11.getId(), p11);
+        
+        Personagem p12 = new Personagem("Griffith", 99, 69, 100);
+        map.put(p12.getId(), p12);
     }
 
     public void addPersonagemToMap(Personagem p) {
